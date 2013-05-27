@@ -1,0 +1,4 @@
+void interpretate_sentence()
+{
+    
+}
