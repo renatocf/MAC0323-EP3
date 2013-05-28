@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "llrb.c"
+/* #include "ST.h" */
 
 #define MAX_OPTION_SIZE 3
 
@@ -10,10 +10,35 @@ int main(int argc, char **argv)
 {
     /** VARIÁVEIS *****************************************************/
         char option[MAX_OPTION_SIZE];
+        char *file_name;
+        FILE *file;
         int verbosity = 0;
         
         printf("MAC0323-EP3: Localização de Palavras I\n");
     
+    /** PRÉ-PROCESSAMENTO DO TEXTO ************************************/
+        if(argc != 2 || argc != 3) 
+        {
+            printf("Uso: ./ep3 -f<arquivo.txt.out>\n");
+            return EXIT_FAILURE;
+        }
+        else if(argv[1][0] != '-' || argv[1][1] != 'f')
+        {
+            printf("Erro: arquivo requerido para análise!\n");
+            printf("Uso: ./ep3 -f<arquivo.txt.out>\n");
+            return EXIT_FAILURE;
+        }    
+        else
+        {
+            /* Nome está separado nos argumentos */
+            if(argc == 3) file_name = argv[3];
+            /* Nome está colado em '-f' nos argumentos */
+            else file_name = &argv[2][2];
+            
+            file = fopen(file_name, "r");
+            fclose(file);
+        }
+        
     /** INTERFACE ITERATIVA *******************************************/
         while(1)
         {

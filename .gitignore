@@ -1,2 +1,6 @@
 *.o
+*.d
+.*
+ep3
+test*
 stanford-corenlp-full-2013-04-04*

@@ -1,17 +1,15 @@
-/*
- * This code is from "Algorithms in C, Third Edition,"
- * by Robert Sedgewick, Addison Wesley Longman, 1998.
- */
-#include <string.h>
+#ifndef H_ITEM_DEFINED
+#define H_ITEM_DEFINED
+
 #include <stdio.h>
+#include <string.h>
 
-typedef int Item;
-typedef int Key;
+typedef void *Item;
+typedef char *Key;
+
 #define key(A) (A)
-#define eq(A, B) ((A) == (B))
-#define less(A, B) ((A)<(B))
-#define NULLitem (-1)
+#define eq(A, B) ((strcmp((A) == (B))) == 0)
+#define less(A, B) ((strcmp((A)<(B))) < 0)
+#define NULLitem NULL
 
- int ITEMscan(Item *);
-void ITEMshow(Item);
- int ITEMrand();
+#endif
