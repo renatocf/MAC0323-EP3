@@ -1,0 +1,9 @@
+# DIRECTORIES ##########################################################
+SRCDIR := .
+OBJDIR := .
+BINDIR := .
+LIBDIR := .
+DOCDIR := .
+CONFDIR := .
+TESTDIR := test
+HEADDIR := .

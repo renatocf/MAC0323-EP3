@@ -52,10 +52,10 @@ struct STnode {
 /* Ponteiro para a raiz da ARNE e nódulo externo */
 struct st {
     link head;
-    /* void *NULLItem; */
-    /* (void *)(*key) (void *); */
-    /* (int)   (*less)(void *, void *); */
-    /* (int)   (*eq)  (void *, void *); */
+    void *NULLitem;
+    void *(*key) (void *);
+    int   (*eq)  (void *, void *);
+    int   (*less)(void *, void *);
 };
 
 /* Link genérico que representa nó externo */
@@ -76,25 +76,32 @@ static link NEW(Item item, link l, link r, int N, int red)
     return x;
 }
 
-ST STinit(void)
+ST STinit(
+    void *NULLitem,
+    void *(*key) (void *),
+    int   (*less)(void *, void *),
+    int   (*eq)  (void *, void *) )
 { 
     ST new = (ST) malloc(sizeof(*new));
     new->head = (z = NEW(NULLitem, 0, 0, 0, 0));
+    new->key = key; new->eq = eq; new->less = less;
+    new->NULLitem = NULLitem;
     return new;
 }
 
 int STcount(ST st) { return st->head->N; }
 
-static Item searchR(link h, Key v)
-{ Key t = key(h->item);
-    if (h == z) return NULLitem;
-    if eq(v, t) return h->item;
-    if less(v, t) return searchR(hl, v);
-    else return searchR(hr, v);
+static Item searchR(ST st, link h, Key v)
+{ 
+    Key t = st->key(h->item);
+    if (h == z) return st->NULLitem;
+    if (st->eq(v, t)) return h->item;
+    if (st->less(v, t)) return searchR(st, hl, v);
+    else return searchR(st, hr, v);
 }
 
 Item STsearch(ST st, Key v) 
-{ return searchR(st->head, v); } 
+{ return searchR(st, st->head, v); } 
 
 static link fixNr(link h)
 { 
@@ -146,19 +153,23 @@ link balance(link h)
 }
 
 /*
- * Insertions
- */
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                              INSERÇÕES        
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
 
-link LLRBinsert(link h, Item item)
+link LLRBinsert(ST st, link h, Item item)
 { 
-    Key v = key(item);
+    Key v = st->key(item);
     /* Insert a new node at the bottom*/
     if (h == z) return NEW(item, z, z, 1, 1);  
 
-    if (less(v, key(h->item)))
-        hl = LLRBinsert(hl, item); 
+    if (st->less(v, st->key(h->item)))
+        hl = LLRBinsert(st, hl, item); 
     else
-        hr = LLRBinsert(hr, item); 
+        hr = LLRBinsert(st, hr, item); 
 
     /* Enforce left-leaning condition */
     if (hr->red && !hl->red) h = rotL(h);
@@ -169,11 +180,15 @@ link LLRBinsert(link h, Item item)
 }
 
 void STinsert(ST st, Item item)
-{ st->head = LLRBinsert(st->head, item); st->head->red = 0; }
+{ st->head = LLRBinsert(st, st->head, item); st->head->red = 0; }
 
 /*
- * Select and sort
- */
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                         SELEÇÃO E ORDENAÇÃO     
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
 
 Item selectR(link h, int r)
 {
@@ -201,37 +216,18 @@ void STsort(ST st, void(*visit)(Item))
 { sortR(st->head, visit); }
 
 /*
- * Print a range
- */
-
-/*void print_rangeR(link h, Key lo, Key hi)
-{
-    if (h == z) return;
-    if (less(lo, key(h->item)))
-        print_rangeR(hl, lo, hi);
-    if ((less(lo, key(h->item)) || eq(lo, key(h->item)))
-            && (less(key(h->item), hi) || eq(key(h->item), hi)))
-        ITEMshow(h->item);
-    if (less(key(h->item), hi))
-        print_rangeR(hr, lo, hi);
-}
-
-void STprint_range(ST st, Key lo, Key hi)
-{ print_rangeR(st->head, lo, hi); }*/
-
-/*
- * Needed for deletion
- */
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                                DELEÇÃO            
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
 
 Item getMin(link h)
 {
     if (hl == z) return h->item;
     else return getMin(hl);
 }
-
-/*
- * Deletions
- */
 
 link deleteMin(link h)
 {
@@ -272,21 +268,21 @@ void STdeleteMax(ST st)
     if (STcount(st) > 0) st->head->red = 0;
 }
 
-link deleteR(link h, Key v)
+link deleteR(ST st, link h, Key v)
 {
-    Key t = key(h->item);
-    if (less(v,t)) {
+    Key t = st->key(h->item);
+    if (st->less(v,t)) {
         if (!hl->red && !hll->red) h = mvRedL(h);
-        hl = deleteR(hl, v);
+        hl = deleteR(st, hl, v);
     } else {
         if (hl->red) h = rotR(h);
-        if (eq(v,key(h->item)) && hr == z)
+        if (st->eq(v,st->key(h->item)) && hr == z)
         { free(h); return z; }
         if (!hr->red && !hrl->red) h = mvRedR(h);
-        if (eq(v,key(h->item))) {
+        if (st->eq(v,st->key(h->item))) {
             h->item = getMin(hr);
             hr = deleteMin(hr);
-        } else hr = deleteR(hr, v);
+        } else hr = deleteR(st, hr, v);
     }
     return balance(h);
 }
@@ -294,84 +290,6 @@ link deleteR(link h, Key v)
 void STdelete(ST st, Key v)
 {
     if (!st->head->l->red && !st->head->r->red) st->head->red = 1;
-    st->head = deleteR(st->head, v);
+    st->head = deleteR(st, st->head, v);
     if (STcount(st) > 0) st->head->red = 0;
 }
-
-/*
- * Integrity check
-
- int size(link h) { return h->N; }
-
- int height(link h) 
- { int tl, tr;
- if (h==z) return 0;
- tl = height(hl); 
- tr = height(hr); 
- return 1 + tl > tr ? tl : tr;
- }
-
- int STheight() { return height(head); }
-
- int check()
- {
- if (!isBST()) printf("Fails the property of BST.\n");
- if (!sizeConsistent()) printf("Fails the size consistency.\n");
- if (!rankConsistent()) printf("Fails the rank consistency.\n");
- if (!is23()) printf("Not a 2-3 tree.\n");
- if (!balanced()) printf("Not balanced.\n");
- return
- isBST() && sizeConsistent() && rankConsistent()
- && is23() && balanced();
- }
-
-*/
-
-/* Drawing? */
-
-/* faz_desenho(): deveria chamar faca_desenho();  
-   acho que nao deveria devolver valor nenhum...
-   */
-
-/* int faz_desenho(link h, int nivel) */
-/* { */
-/*     int d1, d2; */
-/*  */
-/*     if (h->N == 0) { */
-/*         printf("%s\n", no_externo); */
-/*         return 1; */
-/*     } */
-/*  */
-/*     if (nivel == 0) */
-/*         printf("\\pstree[levelsep=%s, treesep=%s]{%s}{\n", level_sep, */
-/*                 tree_sep, no_interno); */
-/*     else */
-/*         printf("\\pstree{%s}{\n", no_interno); */
-/*     d1 = faz_desenho(h->l, nivel+1); */
-/*     d2 = faz_desenho(h->r, nivel+1); */
-/*     printf("}\n"); */
-/*     return d1 + d2 + 1; */
-/* } */
-/*  */
-/* void STdraw(ST st) */
-/* { */
-/*     printf("\\rput{90}{"); */
-/*     faz_desenho(st->head, 0); */
-/*     printf("}\n"); */
-/* } */
-
-/* void printR(link h, int ind) */
-/* { int i; */
-/*     if (h != z) { */
-/*         for (i=0; i<ind; i++) putchar(' '); */
-/*         printf("%d%c\n", key(h->item), h->red?'*':' '); */
-/*         printR(hl, ind+2); */
-/*         printR(hr, ind+2); */
-/*     } */
-/* } */
-/*  */
-/* void STprint(ST st) */
-/* { printf("\n**** %d keys ****\n", STcount(st)); */
-/*     printR(st->head, 0); */
-/*     printf("**** ****** ****\n"); */
-/* } */

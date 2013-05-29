@@ -1,4 +1,0 @@
-void interpretate_sentence()
-{
-    
-}

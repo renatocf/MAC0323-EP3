@@ -1,23 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "getline.h"
 /* #include "ST.h" */
 
 #define MAX_OPTION_SIZE 3
-
-char sequence[80];
 
 int main(int argc, char **argv)
 {
     /** VARIÁVEIS *****************************************************/
         char option[MAX_OPTION_SIZE];
-        char *file_name;
+        char *file_name; int i;
         FILE *file;
+        char *buffer;
         int verbosity = 0;
         
         printf("MAC0323-EP3: Localização de Palavras I\n");
     
     /** PRÉ-PROCESSAMENTO DO TEXTO ************************************/
-        if(argc != 2 || argc != 3) 
+        if(argc != 2 && argc != 3) 
         {
             printf("Uso: ./ep3 -f<arquivo.txt.out>\n");
             return EXIT_FAILURE;
@@ -30,12 +30,14 @@ int main(int argc, char **argv)
         }    
         else
         {
-            /* Nome está separado nos argumentos */
-            if(argc == 3) file_name = argv[3];
-            /* Nome está colado em '-f' nos argumentos */
-            else file_name = &argv[2][2];
+            if(argc == 3) file_name = argv[2];  /* Nome separado */
+            else file_name = &argv[1][2]; /* Nome colado no '-f' */
             
+            /* Abre texto */
             file = fopen(file_name, "r");
+            buffer = getline(file);
+            
+            /* Fecha texto */
             fclose(file);
         }
         
@@ -57,6 +59,9 @@ int main(int argc, char **argv)
                 case 'e': /*1*/
                     break;
                 case 'a': /*2*/
+                    if(buffer == NULL) printf("shit///\n");
+                    for(i = 0; buffer[i] != '\0'; i++)
+                        printf("%c", buffer[i]);
                     break;
                 case 'F': /*3*/
                     return EXIT_SUCCESS;
@@ -117,6 +122,9 @@ int main(int argc, char **argv)
             
             printf("%s\n", option);
         }
+        
+    /** LIBERAÇÃO DE MEMÓRIA ******************************************/
+        free(buffer);
     
     return EXIT_SUCCESS;
 }

@@ -18,6 +18,8 @@ DOCDIR := .
 CONFDIR := .
 TESTDIR := .
 HEADDIR := .
+
+-include directories.mk
 VPATH = $(SRCDIR):$(LIBDIR):$(BINDIR):$(TESTDIR):$(HEADDIR)
 
 ## FILES ##############################################################
@@ -36,7 +38,7 @@ CLIBS  := -I. $(patsubst %,-I%,$(filter-out .%,$(shell find $(HEADDIR) -type d))
 CFLAGS := -ansi -Wall -pedantic -g 
 
 ## LINKAGE ############################################################
-LDLIBS  := -L.
+LDLIBS  := -L. $(patsubst %,-I%,$(filter-out .%,$(shell find $(LIBDIR) -type d)))
 LDFLAGS := -lm
 LDFLAGS += -Wl,-rpath,$(LIBDIR)
 LDFLAGS += $(filter -l%,$(patsubst lib%.a,-l%,$(LIBS))) \
@@ -93,20 +95,50 @@ lib%.a: $(OBJDIR)/$(notdir %.o)
 	$(CC) $< $(CFLAGS) $(CLIBS) -o $(BINDIR)/test$* $(LDLIBS) $(LDFLAGS)
 
 # GENERATED DIR ########################################################
+ifneq ($(SRCDIR),.)
+$(SRCDIR):
+	@ echo Creating directory for source "$@"
+	-$(MKDIR) $@
+endif
+
+ifneq ($(OBJDIR),.)
+$(OBJDIR):
+	@ echo Creating directory for objects "$@"
+	-$(MKDIR) $@
+endif
+
 ifneq ($(BINDIR),.)
 $(BINDIR):
-	@ echo Criando diretório de binários "$@"
+	@ echo Creating directory for binaries "$@"
 	-$(MKDIR) $@
 endif
 
-ifneq ($(BINDIR),.)
-$(OBJDIR):
-	@ echo Criando diretório de objetos "$@"
-	-$(MKDIR) $@
-endif
-
-ifneq ($(BINDIR),.)
+ifneq ($(LIBDIR),.)
 $(LIBDIR):
-	@ echo Criando diretório de objetos "$@"
+	@ echo Creating directory for libraries "$@"
+	-$(MKDIR) $@
+endif
+
+ifneq ($(DOCDIR),.)
+$(LIBDIR):
+	@ echo Creating directory for documents "$@"
+	-$(MKDIR) $@
+endif
+
+ifneq ($(CONFDIR),.)
+$(CONFDIR):
+	@ echo Creating directory for config files "$@"
+	-$(MKDIR) $@
+endif
+
+ifneq ($(TESTDIR),.)
+$(TESTDIR):
+	@ echo Creating directory for tests "$@"
+	-$(MKDIR) $@
+endif
+
+ifneq ($(HEADDIR),.)
+$(HEADDIR):
+	@ echo Creating directory for headers "$@"
 	-$(MKDIR) $@
 endif
