@@ -1,9 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "getline.h"
+
 /* #include "ST.h" */
+#include "word.h"
+#include "lemma.h"
 
 #define MAX_OPTION_SIZE 3
+
+#define TRUE 1
+#define FALSE 0
 
 int main(int argc, char **argv)
 {
@@ -12,7 +18,18 @@ int main(int argc, char **argv)
         char *file_name; int i;
         FILE *file;
         char *buffer;
+        
+        char *identifier;
+        char *sentence;
+        char *annotated;
+        char *word;
+        char *lemma;
+        
         int verbosity = 0;
+        
+        int exit;
+        
+        for(i = 0; i < MAX_OPTION_SIZE; i++) option[i] = ' ';
         
         printf("MAC0323-EP3: Localização de Palavras I\n");
     
@@ -33,9 +50,46 @@ int main(int argc, char **argv)
             if(argc == 3) file_name = argv[2];  /* Nome separado */
             else file_name = &argv[1][2]; /* Nome colado no '-f' */
             
+            /* Inicializa tabelas de símbolos */
+            word_table_init(); 
+            
             /* Abre texto */
             file = fopen(file_name, "r");
             buffer = getline(file);
+            
+            for(i = 0; buffer[i] != '\0'; i++) 
+            {
+                if(strncmp(&buffer[i], "Sentence #", 10 * sizeof(char)) == 0)
+                {
+                    for(identifier = &buffer[i]; buffer[i] != ':'; i++) 
+                        putchar(buffer[i]); /* Tirar */
+                    putchar('\n'); 
+                    i++; sentence = &buffer[i];
+                    
+                    while(buffer[i] != '['
+                    && strncmp(&buffer[i], "[Text=", 6 * sizeof(char))) 
+                        { putchar(buffer[i]); i++; }
+                    annotated = &buffer[i];
+                    
+                    while(1)/* buffer[++i] != '\n')  */
+                    {
+                        while(buffer[i] != '\n' && buffer[i] != '[' 
+                        && strncmp(&buffer[i], "[Text=", 6 * sizeof(char))) i++;
+                        
+                        if(buffer[i] == '\n') break;
+                        i += 6; word = &buffer[i];
+                        
+                        while(buffer[i] != 'L'
+                        && strncmp(&buffer[i], "Lemma=", 6 * sizeof(char))) i++;
+                        i += 6; lemma = &buffer[i];
+                        
+                        word_table_insert(
+                                word, identifier, lemma, sentence, annotated);
+                        
+                        while(buffer[i] != ']') i++;
+                    }
+                }
+            }
             
             /* Fecha texto */
             fclose(file);
@@ -44,7 +98,7 @@ int main(int argc, char **argv)
     /** INTERFACE ITERATIVA *******************************************/
         while(1)
         {
-            verbosity = 0;
+            exit = verbosity = 0;
             printf("> ");
             scanf(" %3s", option);
             
@@ -64,7 +118,7 @@ int main(int argc, char **argv)
                         printf("%c", buffer[i]);
                     break;
                 case 'F': /*3*/
-                    return EXIT_SUCCESS;
+                    exit = 1;
                 case 't': /*4*/
                     break;
                 case 'd': /*5*/
@@ -116,11 +170,12 @@ int main(int argc, char **argv)
                         printf("Opção não reconhecida!\n");
                 }
             }
-            else if(option[2] != ' ') 
+            else if(option[2] != ' ')
                 printf("Opção -%c não aceita argumento %c!\n", 
                         option[1], option[2]);
             
             printf("%s\n", option);
+            if(exit == TRUE) break;
         }
         
     /** LIBERAÇÃO DE MEMÓRIA ******************************************/

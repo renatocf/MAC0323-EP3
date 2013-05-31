@@ -12,6 +12,6 @@
 #ifndef H_LIST_ITEM_DEFINED
 #define H_LIST_ITEM_DEFINED
 
-typedef void *L_Item;
+typedef void * L_Item;
 
 #endif
