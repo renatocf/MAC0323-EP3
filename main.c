@@ -14,7 +14,6 @@
 int main(int argc, char **argv)
 {
     /** VARIÁVEIS *****************************************************/
-        char option[MAX_OPTION_SIZE];
         char *file_name; int i;
         FILE *file;
         char *buffer;
@@ -25,6 +24,8 @@ int main(int argc, char **argv)
         char *word;
         char *lemma;
         
+        char option[MAX_OPTION_SIZE];
+        char *query;
         int verbosity = 0;
         
         int exit;
@@ -55,7 +56,7 @@ int main(int argc, char **argv)
             
             /* Abre texto */
             file = fopen(file_name, "r");
-            buffer = getline(file);
+            buffer = getline(file, EOF);
             
             for(i = 0; buffer[i] != '\0'; i++) 
             {
@@ -83,8 +84,8 @@ int main(int argc, char **argv)
                         && strncmp(&buffer[i], "Lemma=", 6 * sizeof(char))) i++;
                         i += 6; lemma = &buffer[i];
                         
-                        word_table_insert(
-                                word, identifier, lemma, sentence, annotated);
+                        word_table_insert(word, identifier, 
+                                lemma, sentence, annotated);
                         lemma_table_insert(lemma, word);
                         
                         while(buffer[i] != ']') i++;
@@ -102,6 +103,7 @@ int main(int argc, char **argv)
             exit = verbosity = 0;
             printf("> ");
             scanf(" %3s", option);
+            query = getline(stdin, '\n');
             
             if(option[0] != '-') 
             {
@@ -175,7 +177,9 @@ int main(int argc, char **argv)
                 printf("Opção -%c não aceita argumento %c!\n", 
                         option[1], option[2]);
             
-            printf("%s\n", option);
+            printf("%s\n%s\n", option, query);
+            if(query[0] == ' ') printf("ops!\n");
+            free(query);
             if(exit == TRUE) break;
         }
         

@@ -1,6 +1,6 @@
 #include<getline.h>
 
-char *getline(FILE *file)
+char *getline(FILE *file, char separator)
 {
     /** VARIÁVEIS *****************************************************/
         char *line;  /* Linha criada                                 */
@@ -26,7 +26,7 @@ char *getline(FILE *file)
         if(!line) out_of_memory(-2);
         
     /** CRIA AS LINHAS ************************************************/ 
-        while((ch = getc(file)) != EOF) 
+        while((ch = getc(file)) != separator) 
         {
             if(n == size)
                 /* DOBRA o tamanho, copia e aloca com o dobro

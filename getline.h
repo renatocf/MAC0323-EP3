@@ -4,7 +4,7 @@
 
 #define INITIAL_BUF_SIZE 100
 
-char *getline(FILE *file);
+char *getline(FILE *file, char separator);
 
 /* Fazemos um define que representa um tamanho de código
  * passando para ele um valor. Ele substituirá a entrada.
