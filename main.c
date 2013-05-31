@@ -51,7 +51,7 @@ int main(int argc, char **argv)
             else file_name = &argv[1][2]; /* Nome colado no '-f' */
             
             /* Inicializa tabelas de símbolos */
-            lemma_table_init(); word_table_init(); 
+            word_table_init(); lemma_table_init(); 
             
             /* Abre texto */
             file = fopen(file_name, "r");
@@ -83,9 +83,9 @@ int main(int argc, char **argv)
                         && strncmp(&buffer[i], "Lemma=", 6 * sizeof(char))) i++;
                         i += 6; lemma = &buffer[i];
                         
-                        lemma_table_insert(lemma, word);
                         word_table_insert(
                                 word, identifier, lemma, sentence, annotated);
+                        lemma_table_insert(lemma, word);
                         
                         while(buffer[i] != ']') i++;
                     }
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
                  *         em ordem alfabética);
                  * (7) -L: lista de todos os lemas seguidos das 
                  *         palavras no texto com aquele lema;
-                 * (8) -s: estatísticas do texto: total de tokes com
+                 * (8) -s: estatísticas do texto: total de tokens com
                  *         repetição, total de palavras, total de 
                  *         tokens distintos, total de palavras dis-
                  *         tintas, total de lemas distintos.
@@ -180,7 +180,7 @@ int main(int argc, char **argv)
         }
         
     /** LIBERAÇÃO DE MEMÓRIA ******************************************/
-        free(buffer);
+        free(buffer); word_table_free(); lemma_table_free(); 
     
     return EXIT_SUCCESS;
 }

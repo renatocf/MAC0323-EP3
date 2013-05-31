@@ -53,6 +53,7 @@ struct STnode {
 struct st {
     link head;
     void *NULLitem;
+    void  (*free_item) (Item);
     void *(*key) (void *);
     int   (*eq)  (void *, void *);
     int   (*less)(void *, void *);
@@ -60,6 +61,8 @@ struct st {
 
 /* Link genérico que representa nó externo */
 static link z;
+
+static int TSn = 0;
 
 /*
 ////////////////////////////////////////////////////////////////////////
@@ -78,18 +81,22 @@ static link NEW(Item item, link l, link r, int N, int red)
 
 ST STinit(
     void *NULLitem,
+    void  (*free_item) (Item),
     void *(*key) (void *),
     int   (*less)(void *, void *),
     int   (*eq)  (void *, void *) )
 { 
-    ST new = (ST) malloc(sizeof(*new));
-    new->head = (z = NEW(NULLitem, 0, 0, 0, 0));
+    ST new = (ST) malloc(sizeof(*new)); TSn++;
+    if(z == NULL) z = NEW(NULLitem, 0, 0, 0, 0); 
+    new->head = z; new->free_item = free_item;
     new->key = key; new->eq = eq; new->less = less;
     new->NULLitem = NULLitem;
     return new;
 }
 
 int STcount(ST st) { return st->head->N; }
+
+int STempty(ST st) { return st->head->N == 0; }
 
 static Item searchR(ST st, link h, Key v)
 { 
@@ -229,11 +236,11 @@ Item getMin(link h)
     else return getMin(hl);
 }
 
-link deleteMin(link h)
+link deleteMin(ST st, link h)
 {
-    if (hl == z) { free(h); return z; }
+    if (hl == z) { st->free_item(h->item); free(h); return z; }
     if (!hl->red && !hll->red) h = mvRedL(h);
-    hl = deleteMin(hl);
+    hl = deleteMin(st, hl);
     return balance(h);
 }
 
@@ -244,16 +251,16 @@ void STdeleteMin(ST st)
 
     if (!st->head->l->red && !st->head->r->red) st->head->red = 1;
 
-    st->head = deleteMin(st->head);
+    st->head = deleteMin(st, st->head);
     if (STcount(st) > 0) st->head->red = 0;
 }
 
-link deleteMax(link h)
+link deleteMax(ST st, link h)
 {
     if (hl->red) h = rotR(h);
-    if (hr == z) { free(h); return z; }
+    if (hr == z) { st->free_item(h->item); free(h); return z; }
     if (!hr->red && !hrl->red) h = mvRedR(h);
-    hr = deleteMax(hr);
+    hr = deleteMax(st, hr);
     return balance(h);
 }
 
@@ -264,7 +271,7 @@ void STdeleteMax(ST st)
 
     if (!st->head->l->red && !st->head->r->red) st->head->red = 1;
 
-    st->head = deleteMax(st->head);
+    st->head = deleteMax(st, st->head);
     if (STcount(st) > 0) st->head->red = 0;
 }
 
@@ -277,11 +284,11 @@ link deleteR(ST st, link h, Key v)
     } else {
         if (hl->red) h = rotR(h);
         if (st->eq(v,st->key(h->item)) && hr == z)
-        { free(h); return z; }
+        { st->free_item(h->item); free(h); return z; }
         if (!hr->red && !hrl->red) h = mvRedR(h);
         if (st->eq(v,st->key(h->item))) {
             h->item = getMin(hr);
-            hr = deleteMin(hr);
+            hr = deleteMin(st, hr);
         } else hr = deleteR(st, hr, v);
     }
     return balance(h);
@@ -292,4 +299,10 @@ void STdelete(ST st, Key v)
     if (!st->head->l->red && !st->head->r->red) st->head->red = 1;
     st->head = deleteR(st, st->head, v);
     if (STcount(st) > 0) st->head->red = 0;
+}
+
+void STfree(ST st)
+{
+    while(!STempty(st)) STdeleteMin(st);
+    free(st); TSn--; if(TSn == 0) free(z);
 }

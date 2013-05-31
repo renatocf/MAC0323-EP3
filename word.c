@@ -61,6 +61,15 @@ static int eq(void *word1, void *word2)
 static int less(void *word1, void *word2)
     { return strcmp((char *) word1, (char *) word2) < 0; }
 
+static void word_free(void *word)
+{
+    Word w = (Word) word; 
+    list_free(w->identifiers);
+    list_free(w->sentences);
+    list_free(w->annotated);
+    free(w);
+}
+
 
 /*
 ////////////////////////////////////////////////////////////////////////
@@ -72,7 +81,7 @@ static int less(void *word1, void *word2)
 
 void word_table_init()
 {
-    words = STinit(NULLitem, key, eq, less);
+    words = STinit(NULLitem, word_free, key, eq, less);
 }
 
 void word_table_insert(char *word, char *lemma, 
@@ -105,4 +114,9 @@ void word_table_insert(char *word, char *lemma,
         list_insert(query->sentences, sentence);
         list_insert(query->annotated, annotated);
     }
+}
+
+void word_table_free()
+{
+    STfree(words);
 }

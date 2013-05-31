@@ -52,6 +52,13 @@ static int eq(void *lemma1, void *lemma2)
 static int less(void *lemma1, void *lemma2)
     { return strcmp((char *) lemma1, (char *) lemma2) < 0; }
 
+static void lemma_free(void *lemma)
+{
+    Lemma l = (Lemma) lemma;
+    list_free(l->words);
+    free(l);
+}
+
 
 /*
 ////////////////////////////////////////////////////////////////////////
@@ -63,7 +70,7 @@ static int less(void *lemma1, void *lemma2)
 
 void lemma_table_init()
 {
-    lemmas = STinit(NULLitem, key, eq, less);
+    lemmas = STinit(NULLitem, lemma_free, key, eq, less);
 }
 
 void lemma_table_insert(char *lemma, char *word)
@@ -82,4 +89,9 @@ void lemma_table_insert(char *lemma, char *word)
         STinsert(lemmas, query);
     }
     else list_insert(query->words, word);
+}
+
+void lemma_table_free()
+{
+    STfree(lemmas);
 }
