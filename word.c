@@ -36,6 +36,12 @@ struct word
     List annotated;
 };
 
+typedef struct lemma *Lemma;
+struct lemma
+{
+    List words;
+};
+
 ST words;
 
 /*
@@ -100,8 +106,3 @@ void word_table_insert(char *word, char *lemma,
         list_insert(query->annotated, annotated);
     }
 }
-/*
-void word_table_free()
-{
-    
-}*/

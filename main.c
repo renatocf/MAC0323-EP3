@@ -51,7 +51,7 @@ int main(int argc, char **argv)
             else file_name = &argv[1][2]; /* Nome colado no '-f' */
             
             /* Inicializa tabelas de símbolos */
-            word_table_init(); 
+            lemma_table_init(); word_table_init(); 
             
             /* Abre texto */
             file = fopen(file_name, "r");
@@ -83,6 +83,7 @@ int main(int argc, char **argv)
                         && strncmp(&buffer[i], "Lemma=", 6 * sizeof(char))) i++;
                         i += 6; lemma = &buffer[i];
                         
+                        lemma_table_insert(lemma, word);
                         word_table_insert(
                                 word, identifier, lemma, sentence, annotated);
                         
