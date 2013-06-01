@@ -84,8 +84,8 @@ int main(int argc, char **argv)
                         && strncmp(&buffer[i], "Lemma=", 6 * sizeof(char))) i++;
                         i += 6; lemma = &buffer[i];
                         
-                        word_table_insert(word, identifier, 
-                                lemma, sentence, annotated);
+                        word_table_insert(word, lemma, 
+                                identifier, sentence, annotated);
                         lemma_table_insert(lemma, word);
                         
                         while(buffer[i] != ']') i++;
@@ -102,8 +102,7 @@ int main(int argc, char **argv)
         {
             exit = verbosity = 0;
             printf("> ");
-            scanf(" %3s", option);
-            query = getline(stdin, '\n');
+            scanf(" %3s", option); 
             
             if(option[0] != '-') 
             {
@@ -113,27 +112,38 @@ int main(int argc, char **argv)
             }
             switch(option[1]) 
             {
+                Word w;
                 case 'e': /*1*/
+                    getchar(); query = getline(stdin, '\n');
+                    word_print_sentences(word_table_get(query));
                     break;
                 case 'a': /*2*/
+                    getchar(); query = getline(stdin, '\n');
                     if(buffer == NULL) printf("shit///\n");
                     for(i = 0; buffer[i] != '\0'; i++)
                         printf("%c", buffer[i]);
                     break;
                 case 'F': /*3*/
-                    exit = 1;
+                    exit = TRUE;
+                    break;
                 case 't': /*4*/
+                    getchar(); query = getline(stdin, '\n');
                     break;
                 case 'd': /*5*/
+                    getchar(); query = getline(stdin, '\n');
                     break;
                 case 'l': /*6*/
+                    getchar(); query = getline(stdin, '\n');
                     break;
                 case 'L': /*7*/
+                    getchar(); query = getline(stdin, '\n');
                     break;
                 case 's': /*8*/
+                    getchar(); query = getline(stdin, '\n');
                     break;
                 default:
                     printf("Opção não reconhecida!\n");
+                    continue;
                 
                 /* Sumário de opções:
                  * (1) -e: todas as sentenças que contêm exatamente
@@ -156,6 +166,7 @@ int main(int argc, char **argv)
                  *         tintas, total de lemas distintos.
                  */
             }
+            if(exit == TRUE) break;
             if(option[1] == 'a' || option[1] == 'e')
             {
                 switch(option[2])
@@ -176,14 +187,10 @@ int main(int argc, char **argv)
             else if(option[2] != ' ')
                 printf("Opção -%c não aceita argumento %c!\n", 
                         option[1], option[2]);
-            
-            printf("%s\n%s\n", option, query);
-            if(query[0] == ' ') printf("ops!\n");
-            free(query);
-            if(exit == TRUE) break;
         }
         
     /** LIBERAÇÃO DE MEMÓRIA ******************************************/
+        printf("Encerrando programa...\n");
         free(buffer); word_table_free(); lemma_table_free(); 
     
     return EXIT_SUCCESS;

@@ -9,8 +9,47 @@
 /**  Renato Cordeiro Ferreira        7990933  **/
 /***********************************************/ 
 
-#include<stdlib.h>
-#include "list-internal.h"
+/*
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                      BIBLIOTECAS E ESTRUTURAS
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
+/* Bibliotecas */
+#include <stdlib.h>
+#include <stdio.h>
+#include "list.h"
+
+/* Estruturas */
+struct lnode { void *item; Link next; };
+struct list  { Link head; Link last; };
+
+/*
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                              FUNÇÕES
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
+
+Link list_first(List list)
+    { return list->head->next; }
+
+Link list_last(List list)
+    { return list->last; }
+
+void *list_item(Link node)
+    { return node->item; }
+
+int list_empty(List list)
+    { return list->head == list->last; }
+
+Link list_next(Link node)
+{
+    if(node == NULL) return NULL;
+    return node->next;
+}
 
 List list_init()
 {
@@ -24,7 +63,7 @@ List list_init()
     return new;
 }
 
-void list_insert(List list, L_Item item)
+void list_insert(List list, void *item)
 {
     Link new = (Link) malloc(sizeof(*new));
     Link last = list->last;
@@ -36,55 +75,26 @@ void list_insert(List list, L_Item item)
     new->item = item;
 }
 
-L_Item list_remove(List list, Link node)
+void *list_remove(List list, Link node)
 {
-    L_Item dead; Link aux;
-
-    for(aux = list->head; aux->next != node; aux = aux->next);
+    void *dead; Link aux = list->head;
+    while(aux->next != node) aux = aux->next;
     
     if(node == list->last) list->last = aux;
     aux->next = node->next;
-    
-    dead = node->item;
-    free(node);
-    
-    return dead;
-}
 
-int list_empty(List list)
-{
-    return list->head == list->last;
+    dead = node->item; free(node); 
+    return dead;
 }
 
 void list_free(List list)
 {
-    while(!list_empty(list))
-        list_remove(list, list->last);
-    
+    while(!list_empty(list)) list_remove(list, list->last);
     free(list->head); free(list);
 }
 
-Link list_first(List list)
+void list_select(List list, void(*visit)(void *))
 {
-    return list->head->next;
-}
-
-Link list_next(Link node)
-{
-    if(node == NULL) return NULL;
-    return node->next;
-}
-
-L_Item list_item(Link node)
-{
-    L_Item send;
-    send = node->item;
-    return send;
-}
-
-L_Item *list_item_a(Link node)
-{
-    L_Item *send;
-    send = &node->item;
-    return send;
+    Link aux = list->head;
+    do { aux = aux->next; visit(aux->item); } while(aux != list_last(list));
 }

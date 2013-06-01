@@ -7,11 +7,11 @@
 /* Tipo Tabela de Símbolos */
 typedef struct st *ST;
 
-ST STinit        (void *NULLItem, 
-                  void  (*free_item) (Item),
-                  void *(*key) (void *),
-                  int   (*eq)  (void *,void *),
-                  int   (*less)(void *,void *)
+ST STinit        (Item NULLitem, 
+                  void (*free_item) (Item),
+                  Key  (*key) (Item),
+                  int  (*eq)  (Key, Key),
+                  int  (*less)(Key, Key)
                  );
 void STsort      (ST, void(*visit)(Item));
 void STfree      (ST);

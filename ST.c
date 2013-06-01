@@ -80,11 +80,11 @@ static link NEW(Item item, link l, link r, int N, int red)
 }
 
 ST STinit(
-    void *NULLitem,
-    void  (*free_item) (Item),
-    void *(*key) (void *),
-    int   (*less)(void *, void *),
-    int   (*eq)  (void *, void *) )
+    Item NULLitem, 
+    void (*free_item)(Item),
+    Key  (*key)(Item),
+    int  (*eq)(Key, Key),
+    int  (*less)(Key, Key) )
 { 
     ST new = (ST) malloc(sizeof(*new)); TSn++;
     if(z == NULL) z = NEW(NULLitem, 0, 0, 0, 0); 
@@ -100,8 +100,9 @@ int STempty(ST st) { return st->head->N == 0; }
 
 static Item searchR(ST st, link h, Key v)
 { 
-    Key t = st->key(h->item);
+    Key t; 
     if (h == z) return st->NULLitem;
+    t = st->key(h->item);
     if (st->eq(v, t)) return h->item;
     if (st->less(v, t)) return searchR(st, hl, v);
     else return searchR(st, hr, v);

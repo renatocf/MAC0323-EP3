@@ -12,22 +12,20 @@
 #ifndef H_LIST_DEFINED
 #define H_LIST_DEFINED
 
-/* Bibliotecas */
-#include "list-item.h"
-
 /* Lista e link para nódulo de lista */
 typedef struct lnode *Link;
 typedef struct list *List;
 
 /* Funções para uso do cliente */
-List    list_init   (void);
-L_Item  list_item   (Link);
-void    list_free   (List);
-Link    list_next   (Link);
-int     list_empty  (List);
-Link    list_first  (List);
-L_Item *list_item_a (Link);
-void    list_insert (List, L_Item);
-L_Item  list_remove (List, Link);
+List  list_init   (void);
+Link  list_last   (List);
+Link  list_next   (Link);
+void  list_free   (List);
+void *list_item   (Link);
+Link  list_first  (List);
+int   list_empty  (List);
+void *list_remove (List, Link);
+void  list_insert (List, void *);
+void  list_select (List, void(*visit)(void *));
 
 #endif
