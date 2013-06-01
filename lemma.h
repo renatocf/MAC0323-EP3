@@ -12,5 +12,6 @@ void  lemma_table_insert (char *lemma, char *word);
 
 /* Funções para manipulação da palavra */
 void  lemma_print_words  (Lemma);
+void  lemma_list_words   (char *lemma, void(*visit)(char *));
 
 #endif

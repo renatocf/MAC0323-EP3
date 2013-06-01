@@ -11,6 +11,14 @@
 #define TRUE 1
 #define FALSE 0
 
+static void visit(char *word)
+{
+    int s = 0;
+    printf("===============================================\n");
+    while(word[s] != ' ') putchar(word[s++]); 
+    putchar('\n'); /* word_print_sentences(word_table_get(word)); */
+}
+
 int main(int argc, char **argv)
 {
     /** VARIÁVEIS *****************************************************/
@@ -115,13 +123,15 @@ int main(int argc, char **argv)
                 Word w;
                 case 'e': /*1*/
                     getchar(); query = getline(stdin, '\n');
-                    word_print_sentences(word_table_get(query));
+                    w = word_table_get(query);
+                    if(w == NULL) { printf("Palavra não encontrada.\n"); break; }
+                    word_print_sentences(w);
                     break;
                 case 'a': /*2*/
                     getchar(); query = getline(stdin, '\n');
-                    if(buffer == NULL) printf("shit///\n");
-                    for(i = 0; buffer[i] != '\0'; i++)
-                        printf("%c", buffer[i]);
+                    w = word_table_get(query);
+                    if(w == NULL) { printf("Palavra não encontrada.\n"); break; }
+                    query = word_lemma(w); lemma_list_words(query, visit);
                     break;
                 case 'F': /*3*/
                     exit = TRUE;

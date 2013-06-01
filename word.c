@@ -137,17 +137,28 @@ void word_table_insert(char *word, char *lemma,
     }
     else 
     {
-        list_insert(query->identifiers, identifier);
-        list_insert(query->sentences, sentence);
-        list_insert(query->annotated, annotated);
+        int current_n, last_n;
+        char *last_id = list_item(list_last(query->identifiers));
+        sscanf(identifier, "Sentence #%d", &current_n);
+        sscanf(last_id, "Sentence #%d", &last_n);
+        
+        if(current_n != last_n)
+        {
+            list_insert(query->identifiers, identifier);
+            list_insert(query->sentences, sentence);
+            list_insert(query->annotated, annotated);
+        }
     }
 }
 
 void word_print_sentences(Word word)
     { if(word != NULL) list_select(word->sentences, print_sentence); }
 
-void word_word_print_annotateds(Word word)
+void word_print_annotateds(Word word)
     { if(word != NULL) list_select(word->annotated, print_annotated); }
 
-void word_word_print_identifiers(Word word)
+void word_print_identifiers(Word word)
     { if(word != NULL) list_select(word->identifiers, print_identifier); }
+
+char *word_lemma(Word word)
+    { return word->lemma; }

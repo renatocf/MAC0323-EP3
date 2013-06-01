@@ -69,6 +69,8 @@ static void print_word(void *phrase)
     for(s = 0; init[s] != ' '; s++) putchar(init[s]);
 }
 
+static void (*word_visit)(char *);
+static void v(void *var) { word_visit((char *) var); }
 
 /*
 ////////////////////////////////////////////////////////////////////////
@@ -108,3 +110,13 @@ void lemma_table_insert(char *lemma, char *word)
 
 void lemma_print_words(Lemma lemma)
     { list_select(lemma->words, print_word); }
+
+void lemma_list_words(char *lemma, void(*visit)(char *))
+{
+    printf("%s", lemma);
+    Lemma l = (Lemma) STsearch(lemmas, lemma);
+    printf("Será que chega?\n");
+    word_visit = visit; if(l == NULL) return; 
+    printf("Cheguei no select!\n");
+    list_select(l->words, v);
+}
