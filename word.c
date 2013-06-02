@@ -94,6 +94,32 @@ static void print_annotated(void *phrase)
     for(s = 0; init[s] != '\n'; s++) putchar(init[s]);
 }
 
+static void print_tokens(void *word)
+{
+    int s; Word w = (Word) word;
+    for(s = 0; w->word[s] != ' '; s++) putchar(w->word[s]); 
+    putchar('\n');
+}
+
+static void print_words(void *word)
+{
+    int s; Word w = (Word) word;
+    for(s = 0; w->word[s] > 'A' && w->word[s] < 'Z'
+            && w->word[s] > 'a' && w->word[s] < 'z'
+            && w->word[s] != ' '; s++);
+    printf("%.*s\n", s, w->word);
+}
+
+static int n_words = 0;
+static void count_words(void *word)
+{
+    int s; Word w = (Word) word;
+    for(s = 0; w->word[s] != ' '; s++)
+        if(w->word[s] < 'A' || (w->word[s] > 'Z' && w->word[s] < 'a')
+        || w->word[s] > 'z') return;
+    n_words++;
+}
+
 /*
 ////////////////////////////////////////////////////////////////////////
 -----------------------------------------------------------------------
@@ -161,4 +187,10 @@ void word_print_identifiers(Word word)
     { if(word != NULL) list_select(word->identifiers, print_identifier); }
 
 char *word_lemma(Word word)
-    { return word->lemma; }
+    { if(word != NULL) return word->lemma; else return NULL; }
+
+void word_print_words() { STsort(words, print_words); }
+void word_print_tokens() { STsort(words, print_tokens); }
+
+int word_total_words()  { STsort(words, count_words); return n_words; }
+int word_total_tokens() { return STcount(words); }

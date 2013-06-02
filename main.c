@@ -11,13 +11,14 @@
 #define TRUE 1
 #define FALSE 0
 
-static void visit(char *word)
+static void visit_a(char *word)
 {
     int s = 0;
     printf("===============================================\n");
     while(word[s] != ' ') putchar(word[s++]); 
-    putchar('\n'); /* word_print_sentences(word_table_get(word)); */
+    putchar('\n'); word_print_sentences(word_table_get(word));
 }
+
 
 int main(int argc, char **argv)
 {
@@ -36,11 +37,13 @@ int main(int argc, char **argv)
         char *query;
         int verbosity = 0;
         
-        int exit;
+        int total_words = 0;
+        int total_tokens = 0;
+        int total_sentences = 0;
         
         for(i = 0; i < MAX_OPTION_SIZE; i++) option[i] = ' ';
         
-        printf("MAC0323-EP3: Localização de Palavras I\n");
+        printf("MAC0323-EP3: Localização de Palavras I\n\n");
     
     /** PRÉ-PROCESSAMENTO DO TEXTO ************************************/
         if(argc != 2 && argc != 3) 
@@ -64,32 +67,37 @@ int main(int argc, char **argv)
             
             /* Abre texto */
             file = fopen(file_name, "r");
-            buffer = getline(file, EOF);
+            if(file == NULL) 
+                printf("ERRO: arquivo %s não encontrado", file_name);
+            else printf("Carregando o texto...\n");
             
+            buffer = getline(file, EOF);
             for(i = 0; buffer[i] != '\0'; i++) 
             {
                 if(strncmp(&buffer[i], "Sentence #", 10 * sizeof(char)) == 0)
                 {
-                    for(identifier = &buffer[i]; buffer[i] != ':'; i++) 
-                        putchar(buffer[i]); /* Tirar */
-                    putchar('\n'); 
-                    i++; sentence = &buffer[i];
+                    for(identifier = &buffer[i]; buffer[i] != ':'; i++);
+                    i++; sentence = &buffer[i]; total_sentences++;
                     
                     while(buffer[i] != '['
-                    && strncmp(&buffer[i], "[Text=", 6 * sizeof(char))) 
-                        { putchar(buffer[i]); i++; }
+                    && strncmp(&buffer[i], "[Text=", 6 * sizeof(char)) != 0) i++;
                     annotated = &buffer[i];
                     
-                    while(1)/* buffer[++i] != '\n')  */
+                    while(1)
                     {
                         while(buffer[i] != '\n' && buffer[i] != '[' 
                         && strncmp(&buffer[i], "[Text=", 6 * sizeof(char))) i++;
                         
                         if(buffer[i] == '\n') break;
-                        i += 6; word = &buffer[i];
+                        i += 6; word = &buffer[i]; 
+                        total_tokens++; total_words++; 
+                        
+                        for(; buffer[i] != ' '; i++) 
+                            if(buffer[i] < 'A' || (buffer[i] > 'Z' && buffer[i] < 'a')
+                            || buffer[i] > 'z') { total_words--; break; }
                         
                         while(buffer[i] != 'L'
-                        && strncmp(&buffer[i], "Lemma=", 6 * sizeof(char))) i++;
+                        && strncmp(&buffer[i], "Lemma=", 6 * sizeof(char) != 0)) i++;
                         i += 6; lemma = &buffer[i];
                         
                         word_table_insert(word, lemma, 
@@ -108,7 +116,7 @@ int main(int argc, char **argv)
     /** INTERFACE ITERATIVA *******************************************/
         while(1)
         {
-            exit = verbosity = 0;
+            verbosity = 0;
             printf("> ");
             scanf(" %3s", option); 
             
@@ -118,65 +126,78 @@ int main(int argc, char **argv)
                 printf("Use -<opcões> <palavra>\n");
                 continue;
             }
-            switch(option[1]) 
+            if(option[1] == 'F') break; /*3*/
+            else 
             {
                 Word w;
-                case 'e': /*1*/
-                    getchar(); query = getline(stdin, '\n');
-                    w = word_table_get(query);
-                    if(w == NULL) { printf("Palavra não encontrada.\n"); break; }
-                    word_print_sentences(w);
-                    break;
-                case 'a': /*2*/
-                    getchar(); query = getline(stdin, '\n');
-                    w = word_table_get(query);
-                    if(w == NULL) { printf("Palavra não encontrada.\n"); break; }
-                    query = word_lemma(w); lemma_list_words(query, visit);
-                    break;
-                case 'F': /*3*/
-                    exit = TRUE;
-                    break;
-                case 't': /*4*/
-                    getchar(); query = getline(stdin, '\n');
-                    break;
-                case 'd': /*5*/
-                    getchar(); query = getline(stdin, '\n');
-                    break;
-                case 'l': /*6*/
-                    getchar(); query = getline(stdin, '\n');
-                    break;
-                case 'L': /*7*/
-                    getchar(); query = getline(stdin, '\n');
-                    break;
-                case 's': /*8*/
-                    getchar(); query = getline(stdin, '\n');
-                    break;
-                default:
-                    printf("Opção não reconhecida!\n");
-                    continue;
-                
-                /* Sumário de opções:
-                 * (1) -e: todas as sentenças que contêm exatamente
-                 *         a palavra
-                 * (2) -a: todas as sentenças que contêm a palavra
-                 *         e suas variantes;
-                 * (3) -F: fim das instruções;
-                 * (4) -t: lista de todos os 'tokens' presentes no 
-                 *         texto em ordem alfabética;
-                 * (5) -d: lista de todas as palavras no texto, sem
-                 *         repetição e em ordem alfabética;
-                 * (6) -l: todas as palavras presentes no texto em 
-                 *         sua forma lematizada (sem repetição e 
-                 *         em ordem alfabética);
-                 * (7) -L: lista de todos os lemas seguidos das 
-                 *         palavras no texto com aquele lema;
-                 * (8) -s: estatísticas do texto: total de tokens com
-                 *         repetição, total de palavras, total de 
-                 *         tokens distintos, total de palavras dis-
-                 *         tintas, total de lemas distintos.
-                 */
-            }
-            if(exit == TRUE) break;
+                switch(option[1]) 
+                {
+                    case 'e': /*1*/
+                        getchar(); query = getline(stdin, '\n'); 
+                        w = word_table_get(query);
+                        if(w == NULL) printf("Palavra não encontrada.\n");
+                        word_print_sentences(w);
+                        break;
+                    case 'a': /*2*/
+                        getchar(); query = getline(stdin, '\n'); 
+                        w = word_table_get(query);
+                        if(w == NULL) printf("Palavra não encontrada.\n");
+                        query = word_lemma(w); 
+                        lemma_list_words(query, visit_a);
+                        break;
+                    case 't': /*4*/
+                        word_print_tokens();
+                        break;
+                    case 'd': /*5*/
+                        word_print_words();
+                        break;
+                    case 'l': /*6*/
+                        lemma_print_lemmas();
+                        break;
+                    case 'L': /*7*/
+                        lemma_print_lemma_word();
+                        break;
+                    case 's': /*8*/
+                        printf("\n");
+                        printf(" ESTATÍSTICAS DO TEXTO\n");
+                        printf("\n");
+                        printf(" * Total de tokens: %d;\n", total_tokens);
+                        printf(" * Total de palavras: %d;\n", total_words);
+                        printf(" * Total de sentenças: %d;\n", total_sentences);
+                        printf(" * Total de tokens distintos: %d;\n", 
+                              word_total_tokens());
+                        printf(" * Total de palavras distintas: %d;\n", 
+                              word_total_words());
+                        printf(" * Total de lemas distintos: %d.\n", 
+                              lemma_total_lemmas());
+                        
+                        break;
+                    default:
+                        printf("Opção não reconhecida!\n");
+                        continue;
+                    
+                    /* Sumário de opções:
+                     * (1) -e: todas as sentenças que contêm exatamente
+                     *         a palavra
+                     * (2) -a: todas as sentenças que contêm a palavra
+                     *         e suas variantes;
+                     * (3) -F: fim das instruções;
+                     * (4) -t: lista de todos os 'tokens' presentes no 
+                     *         texto em ordem alfabética;
+                     * (5) -d: lista de todas as palavras no texto, sem
+                     *         repetição e em ordem alfabética;
+                     * (6) -l: todas as palavras presentes no texto em 
+                     *         sua forma lematizada (sem repetição e 
+                     *         em ordem alfabética)
+                     * (7) -L: lista de todos os lemas seguidos das 
+                     *         palavras no texto com aquele lema;
+                     * (8) -s: estatísticas do texto: total de tokens com
+                     *         repetição, total de palavras, total de 
+                     *         tokens distintos, total de palavras dis-
+                     *         tintas, total de lemas distintos.
+                     */
+                } /*switch*/
+            } /*else */
             if(option[1] == 'a' || option[1] == 'e')
             {
                 switch(option[2])

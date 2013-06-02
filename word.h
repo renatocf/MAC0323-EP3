@@ -15,9 +15,13 @@ void  word_table_insert (char *word,
                          char *annotated);
 
 /* Funções para manipulação da palavra */
-void  word_print_sentences   (Word);
-void  word_print_annotateds  (Word);
-void  word_print_identifiers (Word);
-char *word_lemma             (Word);
+char *word_lemma               (Word);
+int   word_total_words         (void);
+void  word_print_words         (void);
+int   word_total_tokens        (void);
+void  word_print_tokens        (void);
+void  word_print_sentences     (Word);
+void  word_print_annotateds    (Word);
+void  word_print_identifiers   (Word);
 
 #endif

@@ -96,5 +96,13 @@ void list_free(List list)
 void list_select(List list, void(*visit)(void *))
 {
     Link aux = list->head;
-    do { aux = aux->next; visit(aux->item); } while(aux != list_last(list));
+    while(aux != list_last(list)) { aux = aux->next; visit(aux->item); }
+}
+
+int list_search(List list, void *item, int(*cmp)(void *,void *))
+{
+    Link aux = list->head;
+    while(aux != list_last(list)) 
+        { aux = aux->next; if(cmp(item, aux->item) == 0) return 1; }
+    return 0;
 }

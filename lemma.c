@@ -72,6 +72,33 @@ static void print_word(void *phrase)
 static void (*word_visit)(char *);
 static void v(void *var) { word_visit((char *) var); }
 
+static void print_word2(void *word)
+{
+    int s = 0; char *w = (char *) word;
+    while(w[s] != ' ') putchar(w[s++]); putchar(' ');
+}
+
+static void print_lemma_word(void *lemma)
+{ 
+    int s; Lemma l = (Lemma) lemma;
+    for(s = 0; l->lemma[s] != ']'; s++) putchar(l->lemma[s]);
+    printf(": "); list_select(l->words, print_word2); putchar('\n');
+}
+
+static void print_lemmas(void *lemma)
+{
+    int s; Lemma l = (Lemma) lemma;
+    for(s = 0; l->lemma[s] != ']'; s++) putchar(l->lemma[s]);
+    printf("\n");
+}
+
+static int cmp(void *a, void *b)
+{ 
+    char *A = (char *) a, *B = (char *) b; int s;
+    for(s = 0; A[s] != ' ' && B[s] != ' '; s++);
+    return strncmp(A, B, s * sizeof(char)); 
+}
+
 /*
 ////////////////////////////////////////////////////////////////////////
 -----------------------------------------------------------------------
@@ -105,7 +132,8 @@ void lemma_table_insert(char *lemma, char *word)
         
         STinsert(lemmas, query);
     }
-    else list_insert(query->words, word);
+    else if(!list_search(query->words, word, cmp))
+        list_insert(query->words, word);
 }
 
 void lemma_print_words(Lemma lemma)
@@ -113,10 +141,12 @@ void lemma_print_words(Lemma lemma)
 
 void lemma_list_words(char *lemma, void(*visit)(char *))
 {
-    printf("%s", lemma);
     Lemma l = (Lemma) STsearch(lemmas, lemma);
-    printf("Será que chega?\n");
     word_visit = visit; if(l == NULL) return; 
-    printf("Cheguei no select!\n");
     list_select(l->words, v);
 }
+
+void lemma_print_lemma_word() { STsort(lemmas, print_lemma_word); }
+void lemma_print_lemmas() { STsort(lemmas, print_lemmas); }
+
+int lemma_total_lemmas() { return STcount(lemmas); }

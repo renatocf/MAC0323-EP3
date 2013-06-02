@@ -27,5 +27,6 @@ int   list_empty  (List);
 void *list_remove (List, Link);
 void  list_insert (List, void *);
 void  list_select (List, void(*visit)(void *));
+int   list_search (List, void *item, int(*cmp)(void *,void *));
 
 #endif
