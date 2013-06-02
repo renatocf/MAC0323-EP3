@@ -100,7 +100,7 @@ int STempty(ST st) { return st->head->N == 0; }
 
 static Item searchR(ST st, link h, Key v)
 { 
-    Key t; 
+    Key t;
     if (h == z) return st->NULLitem;
     t = st->key(h->item);
     if (st->eq(v, t)) return h->item;

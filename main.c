@@ -11,14 +11,15 @@
 #define TRUE 1
 #define FALSE 0
 
-static void visit_a(char *word)
-{
-    int s = 0;
-    printf("===============================================\n");
-    while(word[s] != ' ') putchar(word[s++]); 
-    putchar('\n'); word_print_sentences(word_table_get(word));
-}
+static int verbosity = 0;
 
+static void visit(char *word)
+{
+    int s = 0; Word w = word_table_get(word);
+    printf("\n===============================================\n");
+    while(word[s] != ' ') putchar(word[s++]); putchar('\n'); 
+    word_print_sentences(w, verbosity);
+}
 
 int main(int argc, char **argv)
 {
@@ -35,7 +36,6 @@ int main(int argc, char **argv)
         
         char option[MAX_OPTION_SIZE];
         char *query;
-        int verbosity = 0;
         
         int total_words = 0;
         int total_tokens = 0;
@@ -48,13 +48,13 @@ int main(int argc, char **argv)
     /** PRÉ-PROCESSAMENTO DO TEXTO ************************************/
         if(argc != 2 && argc != 3) 
         {
-            printf("Uso: ./ep3 -f<arquivo.txt.out>\n");
+            fprintf(stderr, "Uso: ./ep3 -f<arquivo.txt.out>\n");
             return EXIT_FAILURE;
         }
         else if(argv[1][0] != '-' || argv[1][1] != 'f')
         {
-            printf("Erro: arquivo requerido para análise!\n");
-            printf("Uso: ./ep3 -f<arquivo.txt.out>\n");
+            fprintf(stderr, "Erro: arquivo requerido para análise!\n");
+            fprintf(stderr, "Uso: ./ep3 -f<arquivo.txt.out>\n");
             return EXIT_FAILURE;
         }    
         else
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
             /* Abre texto */
             file = fopen(file_name, "r");
             if(file == NULL) 
-                printf("ERRO: arquivo %s não encontrado", file_name);
+                fprintf(stderr, "ERRO: arquivo %s não encontrado", file_name);
             else printf("Carregando o texto...\n");
             
             buffer = getline(file, EOF);
@@ -106,8 +106,9 @@ int main(int argc, char **argv)
                         
                         while(buffer[i] != ']') i++;
                     }
-                }
-            }
+                    
+                } /*if*/
+            } /*for*/
             
             /* Fecha texto */
             fclose(file);
@@ -122,103 +123,95 @@ int main(int argc, char **argv)
             
             if(option[0] != '-') 
             {
-                printf("Formato de opção inválido!\n");
-                printf("Use -<opcões> <palavra>\n");
+                fprintf(stderr, "Formato de opção inválido!\n");
+                fprintf(stderr, "Use -<opcões> <palavra>\n");
                 continue;
             }
-            if(option[1] == 'F') break; /*3*/
-            else 
+            if(option[1] == 'F') break; /*1*/
+            if(option[1] == 'e' || option[1] == 'a')
             {
                 Word w;
-                switch(option[1]) 
+                getchar(); query = getline(stdin, '\n'); 
+                w = word_table_get(query); free(query);
+                
+                if(w != NULL) 
                 {
-                    case 'e': /*1*/
-                        getchar(); query = getline(stdin, '\n'); 
-                        w = word_table_get(query);
-                        if(w == NULL) printf("Palavra não encontrada.\n");
-                        word_print_sentences(w);
-                        break;
-                    case 'a': /*2*/
-                        getchar(); query = getline(stdin, '\n'); 
-                        w = word_table_get(query);
-                        if(w == NULL) printf("Palavra não encontrada.\n");
-                        query = word_lemma(w); 
-                        lemma_list_words(query, visit_a);
-                        break;
-                    case 't': /*4*/
-                        word_print_tokens();
-                        break;
-                    case 'd': /*5*/
-                        word_print_words();
-                        break;
-                    case 'l': /*6*/
-                        lemma_print_lemmas();
-                        break;
-                    case 'L': /*7*/
-                        lemma_print_lemma_word();
-                        break;
-                    case 's': /*8*/
-                        printf("\n");
-                        printf(" ESTATÍSTICAS DO TEXTO\n");
-                        printf("\n");
-                        printf(" * Total de tokens: %d;\n", total_tokens);
-                        printf(" * Total de palavras: %d;\n", total_words);
-                        printf(" * Total de sentenças: %d;\n", total_sentences);
-                        printf(" * Total de tokens distintos: %d;\n", 
-                              word_total_tokens());
-                        printf(" * Total de palavras distintas: %d;\n", 
-                              word_total_words());
-                        printf(" * Total de lemas distintos: %d.\n", 
-                              lemma_total_lemmas());
-                        
-                        break;
-                    default:
-                        printf("Opção não reconhecida!\n");
-                        continue;
+                    verbosity = 0;
+                    switch(option[2]) /* Verbosidade */
+                    {
+                        case 'v': verbosity = 1; break;
+                        case 'V': verbosity = 2; break;
+                        case ' ': case '\0': break;
+                        default: fprintf(stderr, "Opção não reconhecida!\n");
+                    }
                     
-                    /* Sumário de opções:
-                     * (1) -e: todas as sentenças que contêm exatamente
-                     *         a palavra
-                     * (2) -a: todas as sentenças que contêm a palavra
-                     *         e suas variantes;
-                     * (3) -F: fim das instruções;
-                     * (4) -t: lista de todos os 'tokens' presentes no 
-                     *         texto em ordem alfabética;
-                     * (5) -d: lista de todas as palavras no texto, sem
-                     *         repetição e em ordem alfabética;
-                     * (6) -l: todas as palavras presentes no texto em 
-                     *         sua forma lematizada (sem repetição e 
-                     *         em ordem alfabética)
-                     * (7) -L: lista de todos os lemas seguidos das 
-                     *         palavras no texto com aquele lema;
-                     * (8) -s: estatísticas do texto: total de tokens com
-                     *         repetição, total de palavras, total de 
-                     *         tokens distintos, total de palavras dis-
-                     *         tintas, total de lemas distintos.
-                     */
-                } /*switch*/
-            } /*else */
-            if(option[1] == 'a' || option[1] == 'e')
-            {
-                switch(option[2])
-                {
-                    case 'v':
-                        verbosity = 1;
-                        break;
-                    case 'V':
-                        verbosity = 2;
-                        break;
-                    case ' ':
-                    case '\0':
-                        break;
-                    default:
-                        printf("Opção não reconhecida!\n");
+                    if(option[1] == 'e') /*2*/
+                    {
+                        word_print_sentences(w, verbosity);
+                    }
+                    if(option[1] == 'a') /*3*/
+                    { 
+                        query = word_lemma(w); 
+                        lemma_list_words(query, visit); 
+                    }
                 }
+                else { fprintf(stderr, "Palavra não encontrada.\n"); }
             }
-            else if(option[2] != ' ')
-                printf("Opção -%c não aceita argumento %c!\n", 
-                        option[1], option[2]);
-        }
+            else switch(option[1]) 
+            {
+                case 't': /*4*/
+                    word_print_tokens();
+                    break;
+                case 'd': /*5*/
+                    word_print_words();
+                    break;
+                case 'l': /*6*/
+                    lemma_print_lemmas();
+                    break;
+                case 'L': /*7*/
+                    lemma_print_lemma_word();
+                    break;
+                case 's': /*8*/
+                    printf("\n");
+                    printf(" ESTATÍSTICAS DO TEXTO\n");
+                    printf("\n");
+                    printf(" * Total de tokens: %d;\n", total_tokens);
+                    printf(" * Total de palavras: %d;\n", total_words);
+                    printf(" * Total de sentenças: %d;\n", total_sentences);
+                    printf(" * Total de tokens distintos: %d;\n", 
+                          word_total_tokens());
+                    printf(" * Total de palavras distintas: %d;\n", 
+                          word_total_words());
+                    printf(" * Total de lemas distintos: %d.\n", 
+                          lemma_total_lemmas());
+                    break;
+                default:
+                    fprintf(stderr, "Opção não reconhecida!\n");
+                    continue;
+                
+                /* Sumário de opções:
+                 * (1) -F: fim das instruções;
+                 * (2) -e: todas as sentenças que contêm exatamente
+                 *         a palavra
+                 * (3) -a: todas as sentenças que contêm a palavra
+                 *         e suas variantes;
+                 * (4) -t: lista de todos os 'tokens' presentes no 
+                 *         texto em ordem alfabética;
+                 * (5) -d: lista de todas as palavras no texto, sem
+                 *         repetição e em ordem alfabética;
+                 * (6) -l: todas as palavras presentes no texto em 
+                 *         sua forma lematizada (sem repetição e 
+                 *         em ordem alfabética)
+                 * (7) -L: lista de todos os lemas seguidos das 
+                 *         palavras no texto com aquele lema;
+                 * (8) -s: estatísticas do texto: total de tokens com
+                 *         repetição, total de palavras, total de 
+                 *         tokens distintos, total de palavras dis-
+                 *         tintas, total de lemas distintos.
+                 */
+                    
+            } /*switch*/
+        } /*while(1)*/
         
     /** LIBERAÇÃO DE MEMÓRIA ******************************************/
         printf("Encerrando programa...\n");

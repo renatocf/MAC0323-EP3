@@ -24,8 +24,10 @@
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 */
 
-#define SEPARATOR ' '
-#define NULLitem  NULL
+#define SEPARATOR     ' '
+#define NULLitem      NULL
+#define BUF_CMP_SIZE  500
+#define PRT_SEPARATOR '\n'
 
 struct lemma { char *lemma; List words; };
 ST lemmas;
@@ -42,17 +44,21 @@ static Key key(Item l)
     { Lemma aux = (Lemma) l; return (Key) aux->lemma; }
 
 static int eq(Key lemma1, Key lemma2)
-{
-    char *l1 = (char *) lemma1; char *l2 = (char *) lemma2; int s;
-    for(s = 0; l1[s] != ' ' && l2[s] != ' '; s++);
-    return strncmp(l1, l2, s * sizeof(char)) == 0; 
+{    
+    char *l1 = (char *) lemma1, *l2 = (char *) lemma2; 
+    char L1[BUF_CMP_SIZE], L2[BUF_CMP_SIZE]; int s = 0;
+    for(s = 0; l1[s] != ' '; s++) L1[s] = l1[s]; L1[s] = '\0';
+    for(s = 0; l2[s] != ' '; s++) L2[s] = l2[s]; L2[s] = '\0';
+    return strcmp(L1, L2) == 0;
 }
 
 static int less(Key lemma1, Key lemma2)
 { 
-    char *l1 = (char *) lemma1; char *l2 = (char *) lemma2; int s;
-    for(s = 0; l1[s] != ' ' && l2[s] != ' '; s++);
-    return strncmp(l1, l2, s * sizeof(char)) < 0; 
+    char *l1 = (char *) lemma1, *l2 = (char *) lemma2; 
+    char L1[BUF_CMP_SIZE], L2[BUF_CMP_SIZE]; int s = 0;
+    for(s = 0; l1[s] != ' '; s++) L1[s] = l1[s]; L1[s] = '\0';
+    for(s = 0; l2[s] != ' '; s++) L2[s] = l2[s]; L2[s] = '\0';
+    return strcmp(L1, L2) < 0;
 }
 
 static void lemma_free(void *lemma)
@@ -65,7 +71,7 @@ static void lemma_free(void *lemma)
 static void print_word(void *phrase)
 {
     char *init = (char *) phrase; int s = 0;
-    printf("-------------------------------------------------------\n");
+    printf("\n-------------------------------------------------------\n");
     for(s = 0; init[s] != ' '; s++) putchar(init[s]);
 }
 
@@ -82,21 +88,24 @@ static void print_lemma_word(void *lemma)
 { 
     int s; Lemma l = (Lemma) lemma;
     for(s = 0; l->lemma[s] != ']'; s++) putchar(l->lemma[s]);
-    printf(": "); list_select(l->words, print_word2); putchar('\n');
+    printf(": "); list_select(l->words, print_word2); 
+    putchar(PRT_SEPARATOR);
 }
 
 static void print_lemmas(void *lemma)
 {
     int s; Lemma l = (Lemma) lemma;
     for(s = 0; l->lemma[s] != ']'; s++) putchar(l->lemma[s]);
-    printf("\n");
+    putchar(PRT_SEPARATOR);
 }
 
 static int cmp(void *a, void *b)
 { 
-    char *A = (char *) a, *B = (char *) b; int s;
-    for(s = 0; A[s] != ' ' && B[s] != ' '; s++);
-    return strncmp(A, B, s * sizeof(char)); 
+    char *l1 = (char *) a, *l2 = (char *) b; 
+    char L1[BUF_CMP_SIZE], L2[BUF_CMP_SIZE]; int s = 0;
+    for(s = 0; l1[s] != ' '; s++) L1[s] = l1[s]; L1[s] = '\0';
+    for(s = 0; l2[s] != ' '; s++) L2[s] = l2[s]; L2[s] = '\0';
+    return strcmp(L1, L2);
 }
 
 /*

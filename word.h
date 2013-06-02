@@ -20,8 +20,6 @@ int   word_total_words         (void);
 void  word_print_words         (void);
 int   word_total_tokens        (void);
 void  word_print_tokens        (void);
-void  word_print_sentences     (Word);
-void  word_print_annotateds    (Word);
-void  word_print_identifiers   (Word);
+void  word_print_sentences     (Word, int verbosity);
 
 #endif

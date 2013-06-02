@@ -25,8 +25,17 @@
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 */
 
-#define SEPARATOR ' '
-#define NULLitem  NULL
+#define SEPARATOR     ' '
+#define NULLitem      NULL
+#define BUF_CMP_SIZE  500
+#define PRT_SEPARATOR '\n'
+
+struct sentence
+{
+    List identifiers;
+    List sentences;
+    List annotated;
+}
 
 struct word
 {
@@ -52,16 +61,20 @@ static Key key(Item w)
 
 static int eq(Key word1, Key word2)
 {
-    char *w1 = (char *) word1; char *w2 = (char *) word2; int s;
-    for(s = 0; w1[s] != ' ' && w2[s] != ' '; s++);
-    return strncmp(w1, w2, s * sizeof(char)) == 0; 
+    char *w1 = (char *) word1, *w2 = (char *) word2; 
+    char W1[BUF_CMP_SIZE], W2[BUF_CMP_SIZE]; int s = 0;
+    for(s = 0; w1[s] != ' '; s++) W1[s] = w1[s]; W1[s] = '\0';
+    for(s = 0; w2[s] != ' '; s++) W2[s] = w2[s]; W2[s] = '\0';
+    return strcmp(W1, W2) == 0;
 }
 
 static int less(Key word1, Key word2)
 { 
-    char *w1 = (char *) word1; char *w2 = (char *) word2; int s;
-    for(s = 0; w1[s] != ' ' && w2[s] != ' '; s++);
-    return strncmp(w1, w2, s * sizeof(char)) < 0; 
+    char *w1 = (char *) word1, *w2 = (char *) word2; 
+    char W1[BUF_CMP_SIZE], W2[BUF_CMP_SIZE]; int s = 0;
+    for(s = 0; w1[s] != ' '; s++) W1[s] = w1[s]; W1[s] = '\0';
+    for(s = 0; w2[s] != ' '; s++) W2[s] = w2[s]; W2[s] = '\0';
+    return strcmp(W1, W2) < 0;
 }
 
 static void word_free(void *word)
@@ -76,38 +89,36 @@ static void word_free(void *word)
 static void print_identifier(void *phrase)
 {
     char *init = (char *) phrase; int s = 0;
-    printf("-------------------------------------------------------\n");
     for(s = 0; init[s] != '\n'; s++) putchar(init[s]);
 }
 
 static void print_sentence(void *phrase)
 {
     char *init = (char *) phrase; int s = 0; size_t size = 6 * sizeof(char);
-    printf("-------------------------------------------------------\n");
     while(init[s] != '[' && strncmp(&init[s], "[Text=", size) != 0) putchar(init[s++]);
 }
 
 static void print_annotated(void *phrase)
 {
     char *init = (char *) phrase; int s = 0;
-    printf("-------------------------------------------------------\n");
     for(s = 0; init[s] != '\n'; s++) putchar(init[s]);
+    putchar('\n');
 }
 
 static void print_tokens(void *word)
 {
     int s; Word w = (Word) word;
     for(s = 0; w->word[s] != ' '; s++) putchar(w->word[s]); 
-    putchar('\n');
+    putchar(PRT_SEPARATOR);
 }
 
 static void print_words(void *word)
 {
     int s; Word w = (Word) word;
-    for(s = 0; w->word[s] > 'A' && w->word[s] < 'Z'
-            && w->word[s] > 'a' && w->word[s] < 'z'
-            && w->word[s] != ' '; s++);
-    printf("%.*s\n", s, w->word);
+    for(s = 0; w->word[s] != ' '; s++)
+        if(w->word[s] < 'A' || (w->word[s] > 'Z' && w->word[s] < 'a')
+        || w->word[s] > 'z') return;
+    printf("%.*s", s, w->word); putchar(PRT_SEPARATOR);
 }
 
 static int n_words = 0;
@@ -177,14 +188,22 @@ void word_table_insert(char *word, char *lemma,
     }
 }
 
-void word_print_sentences(Word word)
-    { if(word != NULL) list_select(word->sentences, print_sentence); }
+void word_print_identifiers(Word word)
+    { if(word != NULL) list_select(word->identifiers, print_identifier); }
 
 void word_print_annotateds(Word word)
     { if(word != NULL) list_select(word->annotated, print_annotated); }
 
-void word_print_identifiers(Word word)
-    { if(word != NULL) list_select(word->identifiers, print_identifier); }
+void word_print_sentences(Word word, int verbosity)
+{ 
+    if(word != NULL) 
+    {
+        printf("\n-------------------------------------------------------\n");
+        if(verbosity) word_print_identifiers(word);
+        list_select(word->sentences, print_sentence); 
+        if(verbosity > 1) word_print_annotateds(word);
+    }
+}
 
 char *word_lemma(Word word)
     { if(word != NULL) return word->lemma; else return NULL; }
