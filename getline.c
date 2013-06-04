@@ -1,3 +1,14 @@
+/***********************************************/
+/**  MAC 0323  -  Estrutura de Dados          **/
+/**  IME-USP   -  Primeiro  Semestre de 2013  **/
+/**  Turma 45  -  Yoshiharu Kohayakawa        **/
+/**                                           **/
+/**  Terceiro  Exercício-Programa             **/
+/**  Arquivo:  getline.c                      **/
+/**                                           **/
+/**  Renato Cordeiro Ferreira        7990933  **/
+/***********************************************/ 
+
 #include<getline.h>
 
 char *getline(FILE *file, char separator)
@@ -55,11 +66,6 @@ char *getline(FILE *file, char separator)
         nline = (char *) malloc(n+1);
         if(!line) out_of_memory(-4);
         
-        strcpy(nline, line);
-        /* O strcpy funciona bem porque ele vai até haver \0. Logo,
-         * usamos o strcpy MESMO porque não há perigo de ele ler 
-         * lixo da memória. */
-        free(line);
-        
+        strcpy(nline, line); free(line);
         return nline;
 }

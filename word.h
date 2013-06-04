@@ -1,3 +1,14 @@
+/***********************************************/
+/**  MAC 0323  -  Estrutura de Dados          **/
+/**  IME-USP   -  Primeiro  Semestre de 2013  **/
+/**  Turma 45  -  Yoshiharu Kohayakawa        **/
+/**                                           **/
+/**  Terceiro  Exercício-Programa             **/
+/**  Arquivo:  word.h                         **/
+/**                                           **/
+/**  Renato Cordeiro Ferreira        7990933  **/
+/***********************************************/ 
+
 #ifndef H_WORD_DEFINED
 #define H_WORD_DEFINED
 

@@ -1,3 +1,14 @@
+/***********************************************/
+/**  MAC 0323  -  Estrutura de Dados          **/
+/**  IME-USP   -  Primeiro  Semestre de 2013  **/
+/**  Turma 45  -  Yoshiharu Kohayakawa        **/
+/**                                           **/
+/**  Terceiro  Exercício-Programa             **/
+/**  Arquivo:  lemma.c                        **/
+/**                                           **/
+/**  Renato Cordeiro Ferreira        7990933  **/
+/***********************************************/ 
+
 /*
 ////////////////////////////////////////////////////////////////////////
 -----------------------------------------------------------------------
@@ -29,13 +40,16 @@
 #define BUF_CMP_SIZE  500
 #define PRT_SEPARATOR '\n'
 
+/* Definição de estrutura para o lema */
 struct lemma { char *lemma; List words; };
+
+/* Tabela de símbolos dos lemas */
 ST lemmas;
 
 /*
 ////////////////////////////////////////////////////////////////////////
 -----------------------------------------------------------------------
-                            FUNÇÕES INTERNAS
+                  FUNÇÕES PARA A TABELA DE SÍMBOLOS
 -----------------------------------------------------------------------
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 */
@@ -61,13 +75,22 @@ static int less(Key lemma1, Key lemma2)
     return strcmp(L1, L2) < 0;
 }
 
+/*
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                     FUNÇÕES INTERNAS AUXILIARES 
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
+
+/* Libera as estruturas na tabela de símbolos */
 static void lemma_free(void *lemma)
 {
     Lemma l = (Lemma) lemma;
-    list_free(l->words);
-    free(l);
+    list_free(l->words); free(l);
 }
 
+/* Imprime uma palavra buscando seu separador característico */
 static void print_word(void *phrase)
 {
     char *init = (char *) phrase; int s = 0;
@@ -75,15 +98,21 @@ static void print_word(void *phrase)
     for(s = 0; init[s] != ' '; s++) putchar(init[s]);
 }
 
+/* Ponteiros para funções que auxiliam na transformação
+ * do protótipo 'char *' (que esconde as implementações 
+ * de lista/árvore para o usuário de lemma.c) para um
+ * protótipo 'void *' (requerido pela lista) */
 static void (*word_visit)(char *);
 static void v(void *var) { word_visit((char *) var); }
 
+/* Função para impressão das palavras dos lemas */
 static void print_word2(void *word)
 {
     int s = 0; char *w = (char *) word;
     while(w[s] != ' ') putchar(w[s++]); putchar(' ');
 }
 
+/* Função para impressão das palavras dos lemas */
 static void print_lemma_word(void *lemma)
 { 
     int s; Lemma l = (Lemma) lemma;
@@ -92,6 +121,7 @@ static void print_lemma_word(void *lemma)
     putchar(PRT_SEPARATOR);
 }
 
+/* Função para imprimir um único lema */
 static void print_lemmas(void *lemma)
 {
     int s; Lemma l = (Lemma) lemma;
@@ -99,6 +129,7 @@ static void print_lemmas(void *lemma)
     putchar(PRT_SEPARATOR);
 }
 
+/* Função para comparação entre lemas */
 static int cmp(void *a, void *b)
 { 
     char *l1 = (char *) a, *l2 = (char *) b; 
@@ -145,9 +176,19 @@ void lemma_table_insert(char *lemma, char *word)
         list_insert(query->words, word);
 }
 
+/*
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                  FUNÇÕES DE MANIPULAÇÃO DOS LEMAS  
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
+
+/* Dado um lema, imprime suas palavras */
 void lemma_print_words(Lemma lemma)
     { list_select(lemma->words, print_word); }
 
+/* Realiza ação sobre as palavras dos lemas */
 void lemma_list_words(char *lemma, void(*visit)(char *))
 {
     Lemma l = (Lemma) STsearch(lemmas, lemma);
@@ -155,7 +196,9 @@ void lemma_list_words(char *lemma, void(*visit)(char *))
     list_select(l->words, v);
 }
 
-void lemma_print_lemma_word() { STsort(lemmas, print_lemma_word); }
+/* Imprime todos os lemas e todos os lemas com palavras */
 void lemma_print_lemmas() { STsort(lemmas, print_lemmas); }
+void lemma_print_lemma_word() { STsort(lemmas, print_lemma_word); }
 
+/* Contagem do total de lemas */
 int lemma_total_lemmas() { return STcount(lemmas); }

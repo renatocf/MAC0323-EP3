@@ -1,3 +1,14 @@
+/***********************************************/
+/**  MAC 0323  -  Estrutura de Dados          **/
+/**  IME-USP   -  Primeiro  Semestre de 2013  **/
+/**  Turma 45  -  Yoshiharu Kohayakawa        **/
+/**                                           **/
+/**  Terceiro  Exercício-Programa             **/
+/**  Arquivo:  getline.h                      **/
+/**                                           **/
+/**  Renato Cordeiro Ferreira        7990933  **/
+/***********************************************/ 
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>

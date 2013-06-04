@@ -1,18 +1,54 @@
+/***********************************************/
+/**  MAC 0323  -  Estrutura de Dados          **/
+/**  IME-USP   -  Primeiro  Semestre de 2013  **/
+/**  Turma 45  -  Yoshiharu Kohayakawa        **/
+/**                                           **/
+/**  Terceiro  Exercício-Programa             **/
+/**  Arquivo:  main.c                         **/
+/**                                           **/
+/**  Renato Cordeiro Ferreira        7990933  **/
+/***********************************************/ 
+
+/*
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                               BIBLIOTECAS 
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
+
+/* Bibliotecas-padrão */
 #include <stdio.h>
 #include <stdlib.h>
 #include "getline.h"
 
-/* #include "ST.h" */
+/* Bibliotecas internas */
 #include "word.h"
 #include "lemma.h"
+
+/*
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                           MACROS/ESTRUTURAS
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
 
 #define MAX_OPTION_SIZE 3
 
 #define TRUE 1
 #define FALSE 0
+#define PROMPT ">"
 
 static int verbosity = 0;
 
+/*
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                            FUNÇÕES INTERNAS
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
 static void visit(char *word)
 {
     int s = 0; Word w = word_table_get(word);
@@ -21,38 +57,40 @@ static void visit(char *word)
     word_print_sentences(w, verbosity);
 }
 
+/*
+////////////////////////////////////////////////////////////////////////
+-----------------------------------------------------------------------
+                                 MAIN
+-----------------------------------------------------------------------
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+*/
 int main(int argc, char **argv)
 {
     /** VARIÁVEIS *****************************************************/
-        char *file_name; int i;
-        FILE *file;
-        char *buffer;
+        int i;           /* Contador auxiliar                        */
+        FILE *file;      /* Ponteiro para o arquivo de entrada       */
+        char *buffer;    /* Buffer auxiliar para armazenar o texto   */
+        char *file_name; /* Nome do arquivo com o texto para análise */
         
-        char *identifier;
-        char *sentence;
-        char *annotated;
-        char *word;
-        char *lemma;
+        /* Ponteiros para informações sobre as sentenças analisadas */
+        char *identifier, *annotated, *sentence, *lemma, *word;
         
-        char option[MAX_OPTION_SIZE];
-        char *query;
+        /* Ponteiros para pegar opções do prompt */
+        char *query, option[MAX_OPTION_SIZE];
         
-        int total_words = 0;
-        int total_tokens = 0;
-        int total_sentences = 0;
+        /* Contadores para estatísticas do texto */
+        int total_words = 0, total_tokens = 0, total_sentences = 0;
         
-        for(i = 0; i < MAX_OPTION_SIZE; i++) option[i] = ' ';
-        
-        printf("MAC0323-EP3: Localização de Palavras I\n\n");
-    
     /** PRÉ-PROCESSAMENTO DO TEXTO ************************************/
         if(argc != 2 && argc != 3) 
         {
+            /* Opções incorretas */
             fprintf(stderr, "Uso: ./ep3 -f<arquivo.txt.out>\n");
             return EXIT_FAILURE;
         }
         else if(argv[1][0] != '-' || argv[1][1] != 'f')
         {
+            /* Arquivo não fornecido */
             fprintf(stderr, "Erro: arquivo requerido para análise!\n");
             fprintf(stderr, "Uso: ./ep3 -f<arquivo.txt.out>\n");
             return EXIT_FAILURE;
@@ -74,36 +112,47 @@ int main(int argc, char **argv)
             buffer = getline(file, EOF);
             for(i = 0; buffer[i] != '\0'; i++) 
             {
+                /* 1: Identifica a sentença */
                 if(strncmp(&buffer[i], "Sentence #", 10 * sizeof(char)) == 0)
                 {
+                    /* 2: Percorre o identificador até a sentença*/
                     for(identifier = &buffer[i]; buffer[i] != ':'; i++);
                     i++; sentence = &buffer[i]; total_sentences++;
                     
+                    /* 3: Percorre a sentença até as anotações */
                     while(buffer[i] != '['
                     && strncmp(&buffer[i], "[Text=", 6 * sizeof(char)) != 0) i++;
                     annotated = &buffer[i];
                     
+                    /* 4: Percorre as anotações até acabarem */
                     while(1)
                     {
+                        /* 4.1: início da anotação e palavra anotada */
                         while(buffer[i] != '\n' && buffer[i] != '[' 
                         && strncmp(&buffer[i], "[Text=", 6 * sizeof(char))) i++;
                         
+                        /* Se a linha acaba, não há mais anotações */
                         if(buffer[i] == '\n') break;
-                        i += 6; word = &buffer[i]; 
-                        total_tokens++; total_words++; 
                         
+                        /* 4.2: Guarda endereço e soma aos tokens e palavras. */
+                        i += 6; word = &buffer[i]; total_tokens++; total_words++; 
+                        
+                        /* 4.3: Identifica se o token é mesmo palavra */
                         for(; buffer[i] != ' '; i++) 
                             if(buffer[i] < 'A' || (buffer[i] > 'Z' && buffer[i] < 'a')
                             || buffer[i] > 'z') { total_words--; break; }
                         
+                        /* 4.4: Encontra e armazena o lema da palavra */
                         while(buffer[i] != 'L'
                         && strncmp(&buffer[i], "Lemma=", 6 * sizeof(char) != 0)) i++;
                         i += 6; lemma = &buffer[i];
                         
+                        /* 4.5: Armazena palavra e lema nas tabelas */
                         word_table_insert(word, lemma, 
                                 identifier, sentence, annotated);
                         lemma_table_insert(lemma, word);
                         
+                        /* 4.6: Percorre até o final da anotação */
                         while(buffer[i] != ']') i++;
                     }
                     
@@ -115,12 +164,13 @@ int main(int argc, char **argv)
         }
         
     /** INTERFACE ITERATIVA *******************************************/
+        printf("MAC0323-EP3: Localização de Palavras I\n\n");
         while(1)
         {
             verbosity = 0;
-            printf("> ");
-            scanf(" %3s", option); 
+            printf("%s ", PROMPT); scanf(" %3s", option); 
             
+            /* Caso a opção seja válida */
             if(option[0] != '-') 
             {
                 fprintf(stderr, "Formato de opção inválido!\n");
