@@ -75,7 +75,7 @@ ifneq ($(BINDIR),.)
 endif
 
 .PHONY: distclean
-distclean: clean
+distclean:
 	$(RM) $(BINDIR)/$(BIN)
 	-$(RMDIR) $(BINDIR) $(LIBDIR) 2> /dev/null
 
