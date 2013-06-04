@@ -7,19 +7,21 @@
 \usepackage{indentfirst}                % indentação do primeiro parágrafo
 \usepackage[fixlanguage]{babelbib}
 \usepackage[usenames,svgnames,dvipsnames]{xcolor}
-\usepackage[font=small,format=plain,labelfont=bf,up,textfont=it,up]{caption}
-\usepackage[a4paper,top=2.54cm,bottom=2.0cm,left=2.0cm,right=2.54cm]{geometry}
 
 \usepackage[pdftex,plainpages=false,pdfpagelabels,pagebackref,colorlinks=true,
             citecolor=DarkGreen,linkcolor=NavyBlue,urlcolor=DarkRed,
             filecolor=green,bookmarksopen=true]{hyperref}   % links coloridos
 \usepackage[all]{hypcap}                                    % soluciona o 
                                                             % problema com o 
-                                                            % hyperref e capitulos
- 
-\title{Projeto de Iniciação Científica}
+
+\hypersetup{
+  colorlinks=true,
+  filecolor=blue,
+  % urlcolor=blue!70!black
+}
+
+\title{Localização de Palavras}
 \author{Renato Cordeiro Ferreira}
-\date{23/04/2012}
 
 % ---------------------------------------------------------------------------- %
 % INFORMAÇÕES
@@ -38,60 +40,101 @@
 \newpage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{arabic}     % começamos a numerar 
 
+\maketitle
+
 \section{Introdução} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    Neste exercício-programa, tínhamos como objetivo realizar uma ação
-    que usasse o \LaTeX
+    Neste exercício-programa, tínhamos como objetivo criar uma estrutura
+    que manipulasse as saídas geradas pelo programa CoreNLP,
+    disponibilizado pela Universidade de Stanford\footnote{Disponível em
+    \url{http://nlp.stanford.edu/software/corenlp.shtml}}. O CoreNLP é um
+    software de processamento de linguagem natural que oferece o recurso
+    de ``lematização'': para cada palavra presente num texto, geramos o
+    correspondente ``lema'' - a origem da palavra.
 
-\section{Objetivo} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Para este programa, foram utilizadas as estruturas de listas ligadas
+    e árvores rubro-negras esquerdistas para implementar tabelas de
+    símbolos que manejassem palavras e lemas.
 
-  O projeto tem por objetivo continuar o extenso processo de validação necessária
-  para a publicação do MYOP em revista de alto impacto, em particular desenvolvendo
-  processos automáticos de comparação de predições em relação a dois outros preditores:
-  AUGUSTUS e Genemark.HMM, com eventual desenvolvimento de novos modelos organismo-
-  específicos para serem disponibilizados à comunidade científica.
-  
-  Para tanto, deseja-se realizar o treinamento iterativo dos 11 organismo já presentes
-  com conjuntos de treinamento por conjunto validado, utilizando os programas MYOP e
-  Genemark.HMM. A partir de então, criar uma comparação global entre os modelos de ambos
-  e entre as predições geradas pelo MYOP e pelo AUGUSTUS a partir deles. Baseado nesta
-  experiência, pretende-se desenvolver um ambiente para realização automática de testes.
-  
-  Num segundo momento, objetiva-se implementar um configurador gráfico para o MYOP, 
-  baseado inicialmente na plataforma CoEd. % Adicionar citação Alan
-  
-\section{Metodologia} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
-  Para o início do projeto, será feito um estudo básico dos conceitos de Biologia 
-  Molecular envolvidos no processo de predição de genes \citep{TheCell2002}. 
-  Com esta base, passaremos a avaliar os processos estatísticos e computacionais
-  envolvidos na predição de genes, com a leitura de artigos sobre o assunto: \citet{Costa2003}, 
-  \citet{Snyder1995}, \citet{Zhang2002}, \citet{Korf2004}, \citet{Mathe2002}, 
-  \citet{Wang2004}.
-  
-  Em seguida, para continuar com o extenso processo de validação do Sorgo, treinaremos
-  modelos para os 11 genomas-base já existetes utilizando o método iterativo para,
-  então, utilizá-los nas predições realizadas do AUGUSTUS e do MYOP. Os resultados 
-  obtidos serão comparados com os já existentes das predições \textsl{ab initio}.
-  
-  Baseado nos dados obtidos com a cana-de-açúcar, repetiremos os experimentos realizados
-  sobre o genoma do \textsl{Sorghum bicolor}, com dados obtidos dos sites da NCBI
-  \citep{NCBI} e do banco de dados do genoma das plantas \citep{PlantGDB}. Esta 
-  espécie vegetal, filogenéticamente próxima da cana, oferece desafios parecidos, 
-  e servirá para novamente comparar os desempenhos relativos entre o MYOP e o AUGUSTUS.
-  
-  Com base nas experiências adquiridas nestas avaliações, utilizaremos a aprendizagem da 
-  linguagem Perl \citep{BeginingPerl2001, CorePerl2001} para a criação de scripts que
-  automatizem estes processos. 
-  
-  Como bibliografia de apoio, usaremos Programming: Principles and Practice Using C++
-  \citep{ProgrammingC++1994} e Design Patterns: Elements of Reusable Object-Oriented 
-  Software \citep{DesignPatterns1994} para verificações em códigos C++ (ToPS) e 
-  para a construção de um configurador gráfico para o MYOP.
-  
-\newpage % BIBLIOGRAFIA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \singlespacing   % espaçamento simples
-  \bibliographystyle{plainnat-ime} % citação bibliográfica textual
-  \bibliography{bibliografia}  % associado ao arquivo: 'bibliografia.bib'
-  
+\section{Arquivos} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    O presente EP é composto dos seguintes arquivos:    
+    
+    \begin{itemize}
+      \item \href{run:./getline.c}{getline.c}
+      \item \href{run:./getline.h}{getline.h}
+      \item \href{run:./Item.h}{Item.h}
+      \item \href{run:./lemma.c}{lemma.c}
+      \item \href{run:./lemma.h}{lemma.h}
+      \item \href{run:./list.c}{list.c}
+      \item \href{run:./list.h}{list.h}
+      \item \href{run:./main.c}{main.c}
+      \item \href{run:./Makefile}{Makefile}
+      \item \href{run:./ST.c}{ST.c}
+      \item \href{run:./ST.h}{ST.h}
+      \item \href{run:./word.c}{word.c}
+      \item \href{run:./word.h}{word.h}
+    \end{itemize}
+    
+    Cada um deles apresenta algumas particularidades:
+    
+    \subsection{getline} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        O arquivo 'getline', retirado das notas de aula do prof.
+        Yoshiharu, foi utilizado como um módulo para leitura de strings
+        de tamanho desconhecido. Com ele, foi possível produzir um
+        buffer que armazenasse o texto lido.
+
+    \subsection{lemma} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        Um módulo que utiliza as estruturas de lista e tabela de
+        símbolos para poder construir as funções necessárias para o
+        acesso, contagem e impressão de dados relacionados aos lemas.
+
+    \subsection{list} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        Uma lista generalizada, implementada com o auxílio de ponteiros
+        do tipo \textbf{void *} e com tipos de 1ª classe. É possível
+        usá-la como uma lista genérica para itens de qualquer tipo.
+
+    \subsection{main} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        Arquivo principal do texto que contêm a interface com o usuário
+        (via linha de comando e opções de execução) e a leitura (em fase
+        de pré-processamento) do texto passado como parâmetro ao
+        programa.
+
+    \subsection{makefile} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        Arquivo para a compilação dos arquivos. Sua estrutura é de
+        propósito geral e permite compilar projetos diversificados com
+        diretórios.
+        
+    \subsection{ST} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        Tabela de símbolos implementada com o uso de \textbf{ARNEs}
+        (Árvores Rubro-Negro Esquerdistas). Estas árvores foram
+        generalizadas para a utilização como tipo de 1ª classe e para
+        aceitarem qualquer tipo de estrutura (por meio de ponteiros 
+        \textbf{void *}).
+
+        As árvores rubro-negras foram baseadas no código disponibilizado
+        na página do professor Yoshiharu
+        (\href{http://www.ime.usp.br/~yoshi/2012i/mac323/exx/LLRB.3/llrb.c}{llrb.c})
+        e modificados para aceitar diferentes tipos de chaves. A função de 
+        definição da chave precisa ser especificada juntamente com as funções ``less'', 
+        ``eq'' e o tipo ``NULLitem'' na função ``STinit()``.
+
+    \subsection{word} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        Módulo relacionado a funções de manipulação da tabela de
+        símbolos que armazena palavras. Contém estruturas que guardam
+        uma lista de sentenças, o lema e a própria palavra (por meio de 
+        ponteiros para um buffer) que auxiliam a imprimir, contar e 
+        acessar os dados presentes na tabela de símbolos.
+
+\section{Considerações finais} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Dada a generalização das estruturas propostas por esta implementação
+    do exercício-programa, o custo do uso de ponteiros \textbf{void *}
+    durante quase todo o processo diminuiu a eficiência do
+    pré-processamento e carregamento das estruturas de dados.
+
+    Isso não impediu, porém, que o acesso e impressão dos dados fossem
+    realizados de forma eficiênte, dado que os algoritmos de
+    complexidade logarítmica (O(n)) inerentes às ARNEs mantiveram-se
+    assimptoticamente ótimos para a estrutura.
+
 \end{document}
