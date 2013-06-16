@@ -76,8 +76,10 @@ static int eq(Key word1, Key word2)
 {
     char *w1 = (char *) word1, *w2 = (char *) word2; 
     char W1[BUF_CMP_SIZE], W2[BUF_CMP_SIZE]; int s = 0;
-    for(s = 0; w1[s] != ' '; s++) W1[s] = w1[s]; W1[s] = '\0';
-    for(s = 0; w2[s] != ' '; s++) W2[s] = w2[s]; W2[s] = '\0';
+    for(s = 0; w1[s] != ' ' && w1[s] != '\0'; s++) 
+        W1[s] = w1[s]; W1[s] = '\0';
+    for(s = 0; w2[s] != ' ' && w2[s] != '\0'; s++) 
+        W2[s] = w2[s]; W2[s] = '\0';
     return strcmp(W1, W2) == 0;
 }
 
@@ -85,8 +87,10 @@ static int less(Key word1, Key word2)
 { 
     char *w1 = (char *) word1, *w2 = (char *) word2; 
     char W1[BUF_CMP_SIZE], W2[BUF_CMP_SIZE]; int s = 0;
-    for(s = 0; w1[s] != ' '; s++) W1[s] = w1[s]; W1[s] = '\0';
-    for(s = 0; w2[s] != ' '; s++) W2[s] = w2[s]; W2[s] = '\0';
+    for(s = 0; w1[s] != ' ' && w1[s] != '\0'; s++) 
+        W1[s] = w1[s]; W1[s] = '\0';
+    for(s = 0; w2[s] != ' ' && w2[s] != '\0'; s++) 
+        W2[s] = w2[s]; W2[s] = '\0';
     return strcmp(W1, W2) < 0;
 }
 
